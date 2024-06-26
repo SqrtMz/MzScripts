@@ -1,2 +1,2 @@
 # MzScripts
- Test
+Scripts that I use for some reason.
