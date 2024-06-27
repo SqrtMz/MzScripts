@@ -12,7 +12,7 @@ timedatectl set-ntp true
 clear
 
 # User Configurations
-echo "Hostname: "
+echo -e "Hostname: \c"
 read hostname
 
 echo -e "User: \c"
@@ -58,6 +58,7 @@ done
 
 while true
 do
+    echo
     echo "Use SWAP partition? [y/n]"
     read tSw
 
@@ -91,24 +92,27 @@ pacman-key --populate archlinux
 
 while true
 do
-    echo "Select a linux kernel"
+    echo
+    echo "Select Linux kernel"
     echo "1. Stable"
     echo "2. Zen"
-    read $tKn
+    read kSel
 
-    case $tKn in
-        1 ) kernel = "linux";
+    case $kSel in
+        1 ) echo -e "Stable"
+            kernel="linux"
             break;;
         
-        2 ) kernel = "linux-zen";
+        2 ) echo "Zen"
+            kernel="linux-zen"
             break;;
-        
+
         * ) echo "Invalid option, try again"
             continue;;
     esac
 done
 
-pacstrap /mnt base base-devel neovim linux-firmware $kernel $kernel-headers mkinitcpio fastfetch curl wget git --noconfirm --needed
+pacstrap -i /mnt base base-devel neovim linux-firmware $kernel $kernel-headers mkinitcpio fastfetch curl wget git --noconfirm --needed
 
 # Fstab file generation and chroot
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -155,12 +159,14 @@ passwd $user
 sed -i "s/^root ALL=(ALL:ALL) ALL/root ALL=(ALL:ALL) ALL\n$user ALL=(ALL:ALL) ALL/" /etc/sudoers
 
 # Pacman Config File
+pacman -Syu --noconfirm --needed
+
 sed -i "s/^#color/color" /etc/pacman.conf
 sed -i "s/^#VerbosePkgLists/VerbosePkgLists" /etc/pacman.conf
 sed -i "s/^#ParallelDownloads = 5/ParallelDownloads = 5\nILoveCandy" /etc/pacman.conf
 sed -i "s/^#\\[multilib\\]/\\[multilib\\]/" /etc/pacman.conf
 sed -i "s|^#Include = /etc/pacman.d/mirrorlist|Include = /etc/pacman.d/mirrorlist|" /etc/pacman.conf
-pacman -Syu
+pacman -Syu --noconfirm --needed
 
 # Install Fundamentals
 pacman -S networkmanager wireless_tools grub efibootmgr os-prober xdg-user-dirs
