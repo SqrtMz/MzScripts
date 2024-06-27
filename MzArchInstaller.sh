@@ -117,7 +117,7 @@ pacstrap -i /mnt base base-devel neovim linux-firmware $kernel $kernel-headers m
 # Fstab file generation and chroot
 genfstab -U /mnt >> /mnt/etc/fstab
 
-cat <<EOF > /mnt/tmp/temp.sh
+arch-chroot /mnt <<EOF
 
     echo "Entered to chroot"
 
@@ -209,11 +209,7 @@ cat <<EOF > /mnt/tmp/temp.sh
 
     grub-mkconfig -o /boot/grub/grub.cfg
 
-    exit
-
 EOF
-
-arch-chroot /mnt /tmp/temp.sh
 
 umount -R /mnt
 
