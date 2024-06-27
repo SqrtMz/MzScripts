@@ -1,10 +1,10 @@
 #! /bin/bash
 
-if [[ $DESKTOP_SESSION == "hyprland" ]]; then
+if (($DESKTOP_SESSION == "hyprland")); then
 
     hyprpaper &
 
-elif [[ $DESKTOP_SESSION == "sway" ]]; then
+elif (($DESKTOP_SESSION == "sway")); then
 
     swaybg -i ~/Pictures/"Images & Videos"/ZZ.png &
 
