@@ -97,10 +97,10 @@ do
     read $tKn
 
     case $tKn in
-        1 ) kernel = "linux"
+        1 ) kernel = "linux";
             break;;
         
-        2 ) kernel = "linux-zen"
+        2 ) kernel = "linux-zen";
             break;;
         
         * ) echo "Invalid option, try again"
