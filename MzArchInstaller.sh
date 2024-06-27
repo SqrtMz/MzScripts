@@ -1,15 +1,12 @@
 #! /bin/bash
 
+# Time and date sync
+timedatectl set-ntp true
+
 clear
 
 echo -e "Mz's Arch Installer\nThis installer works once connected to internet and created the partition table"
 echo
-
-sleep 1
-
-# Time and date sync
-timedatectl set-ntp true
-clear
 
 # User Configurations
 echo -e "Hostname: \c"
@@ -17,6 +14,12 @@ read hostname
 
 echo -e "User: \c"
 read user
+
+echo -e "Root user password: \c"
+read rPass
+
+echo -e "User password: \c"
+read uPass
 
 # Partitions formatting and mounting
 while true
@@ -137,9 +140,9 @@ arch-chroot /mnt <<EOF
     # Hostname and hosts
     echo "$hostname" > /etc/hostname
 
-    echo "127.0.0.1   localhost" /etc/hosts
-    echo "::1         localhost" /etc/hosts
-    echo "127.0.1.1   $hostname.localdomain   $hostname" /etc/hosts
+    echo "127.0.0.1   localhost" > /etc/hosts
+    echo "::1         localhost" > /etc/hosts
+    echo "127.0.1.1   $hostname.localdomain   $hostname" > /etc/hosts
 
     # Root Password
     echo
@@ -147,6 +150,7 @@ arch-chroot /mnt <<EOF
     echo
 
     passwd
+    $rPass
 
     # Add User and Password
     useradd -m -g users -G wheel -s /bin/bash $user
@@ -156,6 +160,7 @@ arch-chroot /mnt <<EOF
     echo
 
     passwd $user
+    $uPass
 
     # Add user to sudoers file
     sed -i "s/^root ALL=(ALL:ALL) ALL/root ALL=(ALL:ALL) ALL\n$user ALL=(ALL:ALL) ALL/" /etc/sudoers
@@ -180,28 +185,11 @@ arch-chroot /mnt <<EOF
     xdg-user-dirs-update
     su $user -c "xdg-user-dirs-update"
 
+    echo "Stop táctico"
+    read emparedado
+
     # Grub Config
-
-    while true
-    do
-        echo
-        echo "Is this an removable device installation? [y/n]"
-        echo
-        read tGb
-
-        case $tGb in
-            [Yy]* ) echo "Installing removable media Grub"
-                    grub-install --target=x86-64-efi --efi-directory=/boot --removable
-                    break;;
-            
-            [Nn]* ) echo "Installing non-removable media Grub"
-                    grub-install --target=x86-64-efi --efi-directory=/boot --bootloader-id=$hostname
-                    break;;
-            
-            * ) echo "Invalid option, try again"
-                continue;;
-        esac
-    done
+    grub-install --target=x86-64-efi --efi-directory=/boot --bootloader-id=$hostname
 
     echo "" >> /etc/default/grub
     echo "# Last selected OS" >> /etc/default/grub
