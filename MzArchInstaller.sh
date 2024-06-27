@@ -124,7 +124,7 @@ pacstrap -i /mnt base base-devel neovim linux-firmware $kernel $kernel-headers m
 # Fstab file generation and chroot
 genfstab -U /mnt >> /mnt/etc/fstab
 
-arch-chroot /mnt <<EOF
+arch-chroot /mnt /bin/bash -e <<EOF
 
     echo "Entered to chroot"
 
@@ -144,24 +144,6 @@ arch-chroot /mnt <<EOF
     echo "::1         localhost" > /etc/hosts
     echo "127.0.1.1   $hostname.localdomain   $hostname" > /etc/hosts
 
-    # Root Password
-    echo
-    echo "Write Root User Password"
-    echo
-
-    passwd
-    $rPass
-
-    # Add User and Password
-    useradd -m -g users -G wheel -s /bin/bash $user
-
-    echo
-    echo "Write $user Password"
-    echo
-
-    passwd $user
-    $uPass
-
     # Add user to sudoers file
     sed -i "s/^root ALL=(ALL:ALL) ALL/root ALL=(ALL:ALL) ALL\n$user ALL=(ALL:ALL) ALL/" /etc/sudoers
 
@@ -178,24 +160,12 @@ arch-chroot /mnt <<EOF
     # Install Fundamentals
     pacman -S networkmanager wireless_tools grub efibootmgr os-prober xdg-user-dirs
 
-    echo
-    echo "Stop táctico"
-    sleep 10
-
     # Enable Services
     systemctl enable NetworkManager
-
-    echo
-    echo "Stop táctico"
-    sleep 10
 
     # Create File tree on root and user
     xdg-user-dirs-update
     su $user -c "xdg-user-dirs-update"
-
-    echo
-    echo "Stop táctico"
-    sleep 10
 
     # Grub Config
     grub-install --target=x86-64-efi --efi-directory=/boot --bootloader-id=$hostname
@@ -209,6 +179,9 @@ arch-chroot /mnt <<EOF
     grub-mkconfig -o /boot/grub/grub.cfg
 
 EOF
+
+echo "root:$rPass" | arch-chroot /mnt chpasswd
+echo "$user:$uPass" | arch-chroot /mnt chpasswd
 
 umount -R /mnt
 
