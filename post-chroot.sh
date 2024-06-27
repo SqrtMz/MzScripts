@@ -1,119 +1,11 @@
 #! /bin/bash
 
-clear
-
-echo -e "Mz's Arch Installer\nThis installer works once connected to internet and created the partition table"
-echo
-
-sleep 1
-
-# Time and date sync
-timedatectl set-ntp true
-clear
-
 # User Configurations
 echo "Hostname: "
 read hostname
 
 echo -e "User: \c"
 read user
-
-# Partitions formatting and mounting
-while true
-do
-    echo -e "Path to main partition: \c"
-    read main
-
-    mkfs.ext4 $main
-
-    if (($? == 1))
-    then
-        echo -e "Invalid partition, try again \n"
-        continue
-    fi
-
-    mount $main /mnt
-    mkdir /mnt/boot
-
-    break
-done
-
-while true
-do
-    echo -e "Path to EFI partition: \c"
-    read efi
-
-    mkfs.fat -F32 $efi
-
-    if (($? == 1))
-    then
-        echo -e "Invalid partition, try again \n"
-        continue
-    fi
-
-    mount $efi /mnt/boot
-    
-    break
-done
-
-while true
-do
-    echo "Use SWAP partition? [y/n]"
-    read tSw
-
-    case $tSw in
-        [Yy]* ) echo -e "Write path of SWAP: \c"
-                read swap
-
-                mkswap $swap
-
-                if (($? == 1))
-                then
-                    echo -e "Invalid partition, try again \n"
-                    continue
-                fi
-
-                swapon $swap
-
-                break;;
-        
-        [Nn]* ) echo "No swap partition will be used"
-                break;;
-
-        * ) echo "Invalid option, try again"
-            continue;;
-    esac
-done
-
-# Pacman Keyring and Pacstrap
-pacman-key --init
-pacman-key --populate archlinux
-
-while true
-do
-    echo "Select a linux kernel"
-    echo "1. Stable"
-    echo "2. Zen"
-    read $tKn
-
-    case $tKn in
-        1 ) kernel = "linux"
-            break;;
-        
-        2 ) kernel = "linux-zen"
-            break;;
-        
-        * ) echo "Invalid option, try again"
-            continue;;
-    esac
-done
-
-pacstrap /mnt base base-devel neovim linux-firmware $kernel $kernel-headers mkinitcpio fastfetch curl wget git --noconfirm --needed
-
-# Fstab file generation and chroot
-genfstab -U /mnt >> /mnt/etc/fstab
-
-cat <<EOF > /mnt/tmp/temp.sh
 
 echo "Entered to chroot"
 
@@ -204,29 +96,3 @@ sed -i "s/^#GRUB_DISABLE_OS_PROBER=false/GRUB_DISABLE_OS_PROBER=false/" /etc/def
 grub-mkconfig -o /boot/grub/grub.cfg
 
 exit
-
-EOF
-
-arch-chroot /mnt /tmp/temp.sh
-
-umount -R /mnt
-
-echo
-echo "Mz's Arch Installer - Process Succeeded"
-echo
-
-echo "Device will reboot in 3 seconds..."
-
-sleep 1
-
-echo "Device will reboot in 2 seconds.."
-
-sleep 1
-
-echo "Device will reboot in 1 seconds."
-
-sleep 1
-
-echo "Device rebooting now!"
-
-reboot
