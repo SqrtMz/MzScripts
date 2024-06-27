@@ -63,13 +63,15 @@ do
     read tSw
 
     case $tSw in
-        [Yy]* ) echo -e "Write path of SWAP: \c"
+        [Yy]* ) echo
+                echo -e "Write path of SWAP: \c"
                 read swap
 
                 mkswap $swap
 
                 if (($? == 1))
                 then
+                    echo
                     echo -e "Invalid partition, try again \n"
                     continue
                 fi
@@ -78,10 +80,12 @@ do
 
                 break;;
         
-        [Nn]* ) echo "No swap partition will be used"
+        [Nn]* ) echo
+                echo "No swap partition will be used"
                 break;;
 
-        * ) echo "Invalid option, try again"
+        * ) echo
+            echo "Invalid option, try again"
             continue;;
     esac
 done
@@ -133,11 +137,9 @@ arch-chroot /mnt <<EOF
     # Hostname and hosts
     echo "$hostname" > /etc/hostname
 
-    cat <<EOF > /etc/hosts
-    127.0.0.1   localhost
-    ::1         localhost
-    127.0.1.1   $hostname.localdomain   $hostname
-    EOF
+    echo "127.0.0.1   localhost" /etc/hosts
+    echo "::1         localhost" /etc/hosts
+    echo "127.0.1.1   $hostname.localdomain   $hostname" /etc/hosts
 
     # Root Password
     echo
@@ -182,7 +184,9 @@ arch-chroot /mnt <<EOF
 
     while true
     do
+        echo
         echo "Is this an removable device installation? [y/n]"
+        echo
         read tGb
 
         case $tGb in
@@ -199,11 +203,9 @@ arch-chroot /mnt <<EOF
         esac
     done
 
-    cat <<EOF >> /etc/default/grub
-
-    # Last selected OS
-    GRUB_SAVEDEFAULT=true
-    EOF
+    echo "" >> /etc/default/grub
+    echo "# Last selected OS" >> /etc/default/grub
+    echo "GRUB_SAVEDEFAULT=true" >> /etc/default/grub
 
     sed -i "s/^#GRUB_DISABLE_OS_PROBER=false/GRUB_DISABLE_OS_PROBER=false/" /etc/default/grub
 
@@ -216,19 +218,4 @@ umount -R /mnt
 echo
 echo "Mz's Arch Installer - Process Succeeded"
 echo
-
-echo "Device will reboot in 3 seconds..."
-
-sleep 1
-
-echo "Device will reboot in 2 seconds.."
-
-sleep 1
-
-echo "Device will reboot in 1 seconds."
-
-sleep 1
-
-echo "Device rebooting now!"
-
-reboot
+echo "Type reboot to finish"
