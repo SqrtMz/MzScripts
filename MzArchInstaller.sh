@@ -178,15 +178,24 @@ arch-chroot /mnt <<EOF
     # Install Fundamentals
     pacman -S networkmanager wireless_tools grub efibootmgr os-prober xdg-user-dirs
 
+    echo
+    echo "Stop táctico"
+    sleep 10
+
     # Enable Services
     systemctl enable NetworkManager
+
+    echo
+    echo "Stop táctico"
+    sleep 10
 
     # Create File tree on root and user
     xdg-user-dirs-update
     su $user -c "xdg-user-dirs-update"
 
+    echo
     echo "Stop táctico"
-    read emparedado
+    sleep 10
 
     # Grub Config
     grub-install --target=x86-64-efi --efi-directory=/boot --bootloader-id=$hostname
