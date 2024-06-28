@@ -144,12 +144,12 @@ arch-chroot /mnt /bin/bash -e <<EOF
     echo "::1         localhost" >> /etc/hosts
     echo "127.0.1.1   $hostname.localdomain   $hostname" >> /etc/hosts
 
-    # Add user to sudoers file
+    # Add user and sudoers file
+    useradd -m -g users -G wheel -s /bin/bash $user
+
     sed -i "s/^root ALL=(ALL:ALL) ALL/root ALL=(ALL:ALL) ALL\n$user ALL=(ALL:ALL) ALL/" /etc/sudoers
 
     # Pacman Config File
-    pacman -Syu --noconfirm --needed
-
     # sed -i "s/^#color/color" /etc/pacman.conf
     # sed -i "s/^#VerbosePkgLists/VerbosePkgLists" /etc/pacman.conf
     # sed -i "s/^#ParallelDownloads = 5/ParallelDownloads = 5\nILoveCandy" /etc/pacman.conf
@@ -175,11 +175,11 @@ arch-chroot /mnt /bin/bash -e <<EOF
 
         case $tGb in
             [Yy]* ) echo "Installing removable media Grub"
-                    grub-install --target=x86-64-efi --efi-directory=/boot --removable
+                    grub-install --target=x86_64-efi --efi-directory=/boot --removable
                     break;;
             
             [Nn]* ) echo "Installing non-removable media Grub"
-                    grub-install --target=x86-64-efi --efi-directory=/boot --bootloader-id=$hostname
+                    grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=$hostname
                     break;;
             
             * ) echo "Invalid option, try again"
