@@ -169,7 +169,8 @@ arch-chroot /mnt /bin/bash -e <<EOF
     su $user -c "xdg-user-dirs-update"
 
     # Grub config
-    grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=$hostname
+    grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=$user
+    grub-install --target=x86_64-efi --efi-directory=/boot --removable
 
     echo "" >> /etc/default/grub
     echo "# Last selected OS" >> /etc/default/grub
