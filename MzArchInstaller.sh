@@ -5,7 +5,8 @@ timedatectl set-ntp true
 
 clear
 
-echo -e "Mz's Arch Installer\nThis installer works once connected to internet and created the partition table"
+echo "Mz's Arch Installer"
+echo "This installer works once connected to internet and created the partition table"
 echo
 
 # User Configurations
