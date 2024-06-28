@@ -141,8 +141,8 @@ arch-chroot /mnt /bin/bash -e <<EOF
     echo "$hostname" > /etc/hostname
 
     echo "127.0.0.1   localhost" > /etc/hosts
-    echo "::1         localhost" > /etc/hosts
-    echo "127.0.1.1   $hostname.localdomain   $hostname" > /etc/hosts
+    echo "::1         localhost" >> /etc/hosts
+    echo "127.0.1.1   $hostname.localdomain   $hostname" >> /etc/hosts
 
     # Add user to sudoers file
     sed -i "s/^root ALL=(ALL:ALL) ALL/root ALL=(ALL:ALL) ALL\n$user ALL=(ALL:ALL) ALL/" /etc/sudoers
@@ -150,15 +150,15 @@ arch-chroot /mnt /bin/bash -e <<EOF
     # Pacman Config File
     pacman -Syu --noconfirm --needed
 
-    sed -i "s/^#color/color" /etc/pacman.conf
-    sed -i "s/^#VerbosePkgLists/VerbosePkgLists" /etc/pacman.conf
-    sed -i "s/^#ParallelDownloads = 5/ParallelDownloads = 5\nILoveCandy" /etc/pacman.conf
+    # sed -i "s/^#color/color" /etc/pacman.conf
+    # sed -i "s/^#VerbosePkgLists/VerbosePkgLists" /etc/pacman.conf
+    # sed -i "s/^#ParallelDownloads = 5/ParallelDownloads = 5\nILoveCandy" /etc/pacman.conf
     sed -i "s/^#\\[multilib\\]/\\[multilib\\]/" /etc/pacman.conf
     sed -i "s|^#Include = /etc/pacman.d/mirrorlist|Include = /etc/pacman.d/mirrorlist|" /etc/pacman.conf
     pacman -Syu --noconfirm --needed
 
     # Install Fundamentals
-    pacman -S networkmanager wireless_tools grub efibootmgr os-prober xdg-user-dirs
+    pacman -S networkmanager wireless_tools grub efibootmgr os-prober xdg-user-dirs --noconfirm --needed
 
     # Enable Services
     systemctl enable NetworkManager
@@ -167,8 +167,25 @@ arch-chroot /mnt /bin/bash -e <<EOF
     xdg-user-dirs-update
     su $user -c "xdg-user-dirs-update"
 
-    # Grub Config
-    grub-install --target=x86-64-efi --efi-directory=/boot --bootloader-id=$hostname
+    # Grub config
+    while true
+    do
+        echo "Is this an removable device installation? [y/n]"
+        read tGb
+
+        case $tGb in
+            [Yy]* ) echo "Installing removable media Grub"
+                    grub-install --target=x86-64-efi --efi-directory=/boot --removable
+                    break;;
+            
+            [Nn]* ) echo "Installing non-removable media Grub"
+                    grub-install --target=x86-64-efi --efi-directory=/boot --bootloader-id=$hostname
+                    break;;
+            
+            * ) echo "Invalid option, try again"
+                continue;;
+        esac
+    done
 
     echo "" >> /etc/default/grub
     echo "# Last selected OS" >> /etc/default/grub
